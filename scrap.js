@@ -70,8 +70,9 @@ function fix_metadata(file,track){
     };
     var writer = new id3.Writer();
     var mp3 = new id3.File(file);
-    var coverImage = new id3.Image(prefix+'/'+thumbnail);
-    var meta = new id3.Meta(metadata,[coverImage]);
+    //var coverImage = new id3.Image(prefix+'/'+thumbnail);
+    //var meta = new id3.Meta(metadata,[coverImage]);
+    var meta = new id3.Meta(metadata);
     writer.setFile(mp3).write(meta, function(err) {
 	if (err) {
             console.error(err);
@@ -111,7 +112,8 @@ function get_image(url,filename){
 function get_track_file(track,url){
     
     var filename = pad(track['track_num'],2)+' - '+track['title']+'.mp3';
-    var file = fs.createWriteStream(prefix+"/"+sanitize(filename));
+    var path = prefix+"/"+sanitize(filename);
+    var file = fs.createWriteStream(path);
     file.on('open', (fd)=>{
 	http.get(url, (response) => {
 	    console.log('URL:',url);
@@ -126,7 +128,7 @@ function get_track_file(track,url){
 		    file.write(data);
 		}).on('end',()=>{
 		    file.end();
-		    fix_metadata(prefix+"/"+sanitize(filename),track);
+		    fix_metadata(path,track);
 		});
 	    }else{
 		console.log('Invalid Status ', response.statusCode);
@@ -143,8 +145,8 @@ function process_album_data(obj){
     eval(obj);
     //console.log(TralbumData);
     album_info = TralbumData;
-    get_image(album_info['artThumbURL'], 'thumbnail.jpg');
-    get_image(album_info['artFullsizeUrl'],'cover.jpg');
+    //get_image(album_info['artThumbURL'], 'thumbnail.jpg');
+    //get_image(album_info['artFullsizeUrl'],'cover.jpg');
     
     album_info['trackinfo'].forEach((track)=>{
 	var url = 'http:'+track['file']['mp3-128'];
